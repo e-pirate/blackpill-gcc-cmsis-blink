@@ -1,0 +1,8 @@
+# Editor settings
+.vscode
+
+# Build putput
+*.o
+*.elf
+*.bin
+*.hex

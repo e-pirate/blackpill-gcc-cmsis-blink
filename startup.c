@@ -200,7 +200,7 @@ void main(void);
 void reset_handler(void)
 {
   // Copy .data from FLASH to SRAM
-  uint32_t data_size = &_edata - &_sdata;
+  uint32_t data_size = (uint32_t)&_edata - (uint32_t)&_sdata;
   uint8_t *flash_data = (uint8_t*) &_etext;
   uint8_t *sram_data = (uint8_t*) &_sdata;
   
@@ -210,7 +210,7 @@ void reset_handler(void)
   }
 
   // Zero-fill .bss section in SRAM
-  uint32_t bss_size = &_ebss - &_sbss;
+  uint32_t bss_size = (uint32_t)&_ebss - (uint32_t)&_sbss;
   uint8_t *bss = (uint8_t*) &_sbss;
 
   for (uint32_t i = 0; i < bss_size; i++)

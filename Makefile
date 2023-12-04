@@ -8,9 +8,11 @@ CMSIS = ../CMSIS
 LINKER_FILE = linker_script.ld
 
 CFLAGS = -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -nostdlib
-CPPFLAGS = -DSTM32F411xE
-CPPFLAGS += -I$(CMSIS)/Device/ST/STM32F4/Include
-CPPFLAGS += -I$(CMSIS)/CMSIS/Core/Include
+#CFLAGS += -fdata-sections -ffunction-sections # optimize for unused code
+CFLAGS += -DSTM32F411xE
+CFLAGS += -I.
+CFLAGS += -I$(CMSIS)/Device/ST/STM32F4/Include
+CFLAGS += -I$(CMSIS)/CMSIS/Core/Include
 LDFLAGS = -T $(LINKER_FILE)
 
 PROJECT = blink
@@ -23,21 +25,21 @@ bin: elf
 hex: elf
 	$(OBJCOPY) -O ihex $(PROJECT).elf $(PROJECT).hex
 
-elf: main.o startup.o system_stm32f4xx.o
-	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) $^ -o $(PROJECT).elf
+elf: startup.o system_stm32f4xx.o main.o
+	$(CC) $(CFLAGS) $(LDFLAGS) $^ -o $(PROJECT).elf
 	@echo ""
 	$(SIZE) $(PROJECT).elf
 	@echo "   code   inted uninted   total"
 	@echo ""
 
 main.o: main.c
-	$(CC) $(CFLAGS) $(CPPFLAGS) main.c -c
+	$(CC) $(CFLAGS) -c main.c
 
 startup.o: startup.c
-	$(CC) $(CFLAGS) $(CPPFLAGS) startup.c -c
+	$(CC) $(CFLAGS) -c startup.c
 
 system_stm32f4xx.o: $(CMSIS)/Device/ST/STM32F4/Source/Templates/system_stm32f4xx.c
-	$(CC) $(CFLAGS) $(CPPFLAGS) $(CMSIS)/Device/ST/STM32F4/Source/Templates/system_stm32f4xx.c -c
+	$(CC) $(CFLAGS) -c $(CMSIS)/Device/ST/STM32F4/Source/Templates/system_stm32f4xx.c
 
 .PHONY: clean
 clean:

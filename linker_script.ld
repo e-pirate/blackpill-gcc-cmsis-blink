@@ -1,4 +1,4 @@
-ENTRY(reset_handler)
+ENTRY(Reset_exception_handler)
 
 MEMORY
 {

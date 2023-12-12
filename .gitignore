@@ -6,4 +6,4 @@
 *.elf
 *.bin
 *.hex
-vendor
+*.bak

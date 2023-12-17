@@ -1,36 +1,36 @@
 CC = arm-none-eabi-gcc
 OBJCOPY = arm-none-eabi-objcopy
-SIZE = arm-none-eabi-size
-PROGRAMMER = st-flash
+MD5SUM = md5sum
+ST-FLASH = st-flash
 
-CMSIS = ../CMSIS
+CMSIS = ../../CMSIS
 
 LINKER_FILE = linker_script.ld
 
-CFLAGS = -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -nostdlib
-#CFLAGS += -fdata-sections -ffunction-sections # optimize for unused code
+CFLAGS = -std=c99 -Wall -Werror
+CFLAGS += -fdce -ffunction-sections -fdata-sections # Optimize for unused code
+CFLAGS += -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mabi=aapcs -mfpu=fpv4-sp-d16 # ARM Cortex-M4F core with Floating point unit options
+CFLAGS += -nostdlib
 CFLAGS += -DSTM32F411xE
 CFLAGS += -I.
-CFLAGS += -I$(CMSIS)/Device/ST/STM32F4/Include
 CFLAGS += -I$(CMSIS)/CMSIS/Core/Include
-LDFLAGS = -T $(LINKER_FILE)
+CFLAGS += -I$(CMSIS)/Device/ST/STM32F4/Include
+LDFLAGS = -T $(LINKER_FILE) -Wl,--fatal-warnings -Wl,--no-warn-rwx-segments -Wl,--gc-sections -Wl,--print-memory-usage
 
 PROJECT = blink
 
 all: clean elf
 
-bin: elf
+bin: all
 	$(OBJCOPY) -O binary $(PROJECT).elf $(PROJECT).bin
 
-hex: elf
+hex: all
 	$(OBJCOPY) -O ihex $(PROJECT).elf $(PROJECT).hex
 
 elf: startup.o system_stm32f4xx.o main.o
 	$(CC) $(CFLAGS) $(LDFLAGS) $^ -o $(PROJECT).elf
 	@echo ""
-	$(SIZE) $(PROJECT).elf
-	@echo "   code   inted uninted   total"
-	@echo ""
+	$(MD5SUM) $(PROJECT).elf
 
 main.o: main.c
 	$(CC) $(CFLAGS) -c main.c
@@ -46,4 +46,4 @@ clean:
 	rm -f *.o $(PROJECT).elf $(PROJECT).bin $(PROJECT).hex
 
 run: bin
-	$(PROGRAMMER) write $(PROJECT).bin 0x800000
+	$(ST-FLASH) --reset write $(PROJECT).bin 0x8000000

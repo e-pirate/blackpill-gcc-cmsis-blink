@@ -51,7 +51,7 @@ void clocks_setup()
     __DSB();
 
     // 2b. Set regulator voltage scale mode 3 (HCLK <= 64MHz)
-//    PWR->CR &= ~(PWR_CR_VOS_Msk);
+    PWR->CR &= ~(PWR_CR_VOS_Msk);
     PWR->CR |= (0b01 << PWR_CR_VOS_Pos);
 
     // 3. Configure flash controller for 2.7-3.3V supply and 30 MHz < HCLK <= 64 < MHz -> 1 WS,
@@ -87,12 +87,15 @@ void clocks_setup()
     RCC->CR |= RCC_CR_PLLON_Msk;
     while (! (RCC->CR & RCC_CR_PLLRDY_Msk));
 
-    // 7. Select PLL output as system clock source
+    // 7. Wait for the Regulator voltage scaling mode to be actually set after enabling PLL
+    while (! (PWR->CSR & PWR_CSR_VOSRDY_Msk));
+
+    // 8. Select PLL output as system clock source
     RCC->CFGR |= (RCC_CFGR_SW_PLL << RCC_CFGR_SW_Pos);
     // Wiat for PLL to become system clock source
     while (! (RCC->CFGR & RCC_CFGR_SWS_PLL));
 
-    // 8. Disable internal 16 MHz RC oscillator (hsi) to reduce power consumption as it is not needed anymore
+    // 9. Disable internal 16 MHz RC oscillator (hsi) to reduce power consumption as it is not needed anymore
     RCC->CR &= ~(RCC_CR_HSION_Msk);
 }
 

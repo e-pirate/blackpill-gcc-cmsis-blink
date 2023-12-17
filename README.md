@@ -2,7 +2,7 @@
 
 This project is an attempt to produce a working code for BlackPill v3 ARM Cortex-M4F STM32F411 development board by WeAct Studio. Board description and related documents can be found [here](https://github.com/WeActStudio/WeActStudio.MiniSTM32F4x1).
 
-The main goal of this project is to get an apprentice MCU developer a blinking BlackPill from scratch using as few proprietary and vendor specific toolchain components as possible. Therefore only _arm-gnu-toolchain_, _CMSIS_, _stlink_/_dfu-util_, _vim_ and _GNU Make_ will be used to make all the magic to happen.
+The main goal of this project is to get an apprentice MCU developer a blinking BlackPill from scratch using as few proprietary and vendor specific toolchain components as possible. Therefore only _arm-gnu-toolchain_, _CMSIS_, _stlink_ / _dfu-util_, _vim_ and _GNU Make_ will be used to make all the magic to happen.
 
 This project became possible and based on Kristian Klein-Wengel's series of blog posts "STM32 without CubeIDE" and his repository that can be found here:
 - [Part 1: The bare necessities](https://kleinembedded.com/stm32-without-cubeide-part-1-the-bare-necessities)
@@ -24,12 +24,32 @@ To load compiled firmware to the MCU's flash memory a programmer is required. It
 
 If programmer is not available, it is also possible to upload firmware on some (including described STM32F411) ST MCUs using DFU method that requires no additional hardware except USB Type-C cable and `dfu-util`. To enter DFU bootloader mode on BlackPill board it should be connected to the USB port of the host system and special button sequence mast be performed. Please, refer to section "How to enter ISP mode" of WeAct Studio board description page mentioned above.
 
-To make firmware uploading work `st-flash` (part of stlink package) or `dfu-util` should be installed and present in PATH variable of the host system.
+To make firmware uploading work `st-flash` (part of _stlink_ package) or `dfu-util` should be installed and present in PATH variable of the host system.
 
 ## ARM GNU Toolchain
 To cross-compile code for ARM Cortex-M4 based MCUs a set of compilation utils is required. To reduce dependency from vendors and other proprietary software, a widely used **ARM GNU Toolchain** can be relied on. A full set of compilation utils can be downloaded from this [page](https://developer.arm.com/downloads/-/arm-gnu-toolchain-downloads). There is a whole bunch of different version, but we need _arm-gnu-toolchain-X.Y.relN-HOST-arm-none-eabi_. Pay attention that 'AArch32 bare-metal target (**arm-none-eabi**)' for your host OS and CPU type should be selected. For modern GNU/Linux this will be _arm-gnu-toolchain-X.Y.relN-x86\_64-arm-none-eabi.tar.xz_. This version comes with _newlib_ that will make sense later.
 
-Download and unpack it on your host machine then add path to the the executable (`bin/`) and man (optional) directories to your `PATH` variable. Then run `arm-none-eabi-gcc --version` command and make sure that correct GCC version is shown.
+Download and unpack it on your host machine:
+```bash
+sudo tar xpf arm-gnu-toolchain-13.2.rel1-x86_64-arm-none-eabi.tar.xz -C /opt/
+sudo ln -s /opt/arm-gnu-toolchain-13.2.Rel1-x86_64-arm-none-eabi /opt/arm-gnu-toolchain
+```
+
+Add path to the the executable (`bin/`) and man (optional) directories to `PATH` variable of your `.bashrc`:
+```bash
+# arm-gnu-toolchain
+PATH="$PATH:/opt/arm-gnu-toolchain/bin"
+MANPATH="$MANPATH:/opt/arm-gnu-toolchain/share/man"
+```
+
+Then run `arm-none-eabi-gcc --version` command and make sure that correct GCC version is shown:
+```bash
+$ arm-none-eabi-gcc --version
+arm-none-eabi-gcc (Arm GNU Toolchain 13.2.rel1 (Build arm-13.7)) 13.2.1 20231009
+Copyright (C) 2023 Free Software Foundation, Inc.
+This is free software; see the source for copying conditions.  There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+```
 
 ## CMSIS
 **CMSIS** (Common Microcontroller Software Interface Standard) is another mandatory part of the toolchain needed to build your own projects for STM32 MCUs. CMSIS is publicly developed and available on GitHub. CMSIS can be found [here](https://github.com/ARM-software/CMSIS_5/).

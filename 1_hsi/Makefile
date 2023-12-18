@@ -33,17 +33,18 @@ elf: startup.o system_stm32f4xx.o main.o
 	$(MD5SUM) $(PROJECT).elf
 
 main.o: main.c
-	$(CC) $(CFLAGS) -c main.c
+	$(CC) $(CFLAGS) -c $^
 
 startup.o: startup.c
-	$(CC) $(CFLAGS) -c startup.c
+	$(CC) $(CFLAGS) -c $^
 
 system_stm32f4xx.o: $(CMSIS)/Device/ST/STM32F4/Source/Templates/system_stm32f4xx.c
-	$(CC) $(CFLAGS) -c $(CMSIS)/Device/ST/STM32F4/Source/Templates/system_stm32f4xx.c
+	$(CC) $(CFLAGS) -c $^
 
 .PHONY: clean
 clean:
 	rm -f *.o $(PROJECT).elf $(PROJECT).bin $(PROJECT).hex
 
+.PHONY: run
 run: bin
 	$(ST-FLASH) --reset write $(PROJECT).bin 0x8000000

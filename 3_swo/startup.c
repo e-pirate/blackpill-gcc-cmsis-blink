@@ -6,7 +6,11 @@
 #define STACK_POINTER_INIT_ADDRESS (SRAM_END)
 #define ISR_VECTOR_SIZE_WORDS 102 // Total exception count + interrupt count + 2
 
+extern uint32_t _etext, _sdata, _edata, _sbss, _ebss, _sidata;
+
 void default_handler(void);
+int main(void);
+void __libc_init_array();
 
 // Cortex-M4 system exceptions
 void Reset_exception_handler(void);
@@ -186,15 +190,12 @@ uint32_t isr_vector[ISR_VECTOR_SIZE_WORDS] __attribute__((section(".isr_vector")
     (uint32_t)&SPI5_interrupt_handler                   // 0x0000 0194
 };
 
-extern uint32_t _etext, _sdata, _edata, _sbss, _ebss;
-void main(void);
-
 void Reset_exception_handler(void)
 {
     // Copy .data from FLASH to SRAM
     uint32_t data_size = (uint32_t)&_edata - (uint32_t)&_sdata;
-    uint8_t *flash_data = (uint8_t*) &_etext;
-    uint8_t *sram_data = (uint8_t*) &_sdata;
+    uint8_t *flash_data = (uint8_t*) &_sidata; // Data load address (in FLASH)
+    uint8_t *sram_data = (uint8_t*) &_sdata; // Data virtual address (in SRAM)
   
     for (uint32_t i = 0; i < data_size; i++)
     {
@@ -210,6 +211,8 @@ void Reset_exception_handler(void)
         bss[i] = 0;
     }
   
+    __libc_init_array();
+
     main();
 }
 

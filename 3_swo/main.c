@@ -1,5 +1,7 @@
 #include <stdint.h>
+#include <stdio.h>
 #include "stm32f4xx.h"
+#include "usart.h"
 
 #define LED_PIN 13
 
@@ -25,10 +27,13 @@ int main(void)
 
     __enable_irq();
 
+    usart_init(USART2);
+
     while(1)
     {
         GPIOC->ODR ^= (1 << LED_PIN);
-        printf("[%.3f] Hello, World!\r\n", (float)ticks/1000.0);
+        printf("[%7ld.%03i] LED: %o\r\n", ticks / 1000, (uint16_t) ticks % 1000, (unsigned char)!((GPIOC->ODR & (1 << LED_PIN)) >> LED_PIN));
+//        printf("[%.3f] Hello, World!\r\n", (float)(ticks/1000.0));
         delay_ms(500);
     }
 
@@ -37,7 +42,8 @@ int main(void)
 
 void clocks_setup()
 {
-    /* After reset MCU clock source is set to internal 16 MHz RC oscillator
+    /* 
+     * After reset MCU clock source is set to internal 16 MHz RC oscillator
      * and flash wait states (WS) set to 0. To switch clock source and increase
      * CPU (HCLK) frequency special procedure mast be performed.
      */ 

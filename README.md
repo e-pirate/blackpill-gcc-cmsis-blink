@@ -12,7 +12,7 @@ This project became possible and based on Kristian Klein-Wengel's series of blog
 
 But unlike the original project, this one is concentrated on getting a working firmware loaded to the BlackPill board with just a brief preceding steps explanation. Instead, more attention paid to code comments and register configuration aimed to clarify what a particular line of code and register does. Also, rework of source code and Makefile was made including some error fixing and optimization.
 
-This project will be particularly useful for developers using GNU/Linux as host system because it focuses on toolchain for this type of host systems assuming that `make`, `git` and `st-flash` or `dfu-util` are already installed. MacOS and Windows users still can make use of this project as all used tools are available for thoue platforms as well with very minor differences.
+This project will be particularly useful for developers using GNU/Linux as host system because it focuses on toolchain for this type of host systems assuming that `make`, `git` and `st-flash` or `dfu-util` are already installed. MacOS and Windows users still can make use of this project as all used tools are available for thous platforms as well with very minor differences.
 
 ## Stages
 The project is divided on several "stages" with growing complexity and functionality that utilize different MCU's hardware and peripherals. Each "stage" is placed in individual directory and can be compiled separately. 
@@ -35,7 +35,7 @@ sudo tar xpf arm-gnu-toolchain-13.2.rel1-x86_64-arm-none-eabi.tar.xz -C /opt/
 sudo ln -s /opt/arm-gnu-toolchain-13.2.Rel1-x86_64-arm-none-eabi /opt/arm-gnu-toolchain
 ```
 
-Add path to the the executable (`bin/`) and man (optional) directories to `PATH` variable of your `.bashrc`:
+Add path to the executable (`bin/`) and man (optional) directories to `PATH` variable of your `.bashrc`:
 ```bash
 # arm-gnu-toolchain
 PATH="$PATH:/opt/arm-gnu-toolchain/bin"

@@ -60,6 +60,6 @@ void usart_init(USART_TypeDef *usart)
 
 void usart_write(USART_TypeDef *usart, char c)
 {
-    usart->DR = c;
     while (!(usart->SR & USART_SR_TC));
+    usart->DR = c;
 }

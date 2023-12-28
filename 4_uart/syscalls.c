@@ -1,7 +1,8 @@
 #include <sys/stat.h>
 #include <sys/times.h>
-#include "usart.h"
 #include <errno.h>
+#include "usart.h"
+
 #undef errno
 extern int errno;
 
@@ -81,16 +82,17 @@ register char * stack_ptr __asm("sp");
 
 caddr_t _sbrk(int incr)
 {
-    extern char __bss_end__;		/* Defined by the linker */
+    extern char _end;		/* Defined by the linker */
     static char *heap_end;
     char *prev_heap_end;
- 
+
     if (heap_end == 0)
     {
-        heap_end = &__bss_end__;
+        heap_end = &_end;
     }
 
     prev_heap_end = heap_end;
+
     if (heap_end + incr > stack_ptr)
     {
         while (1)
@@ -129,12 +131,10 @@ int _wait(int *status)
 
 int _write(int file, char *ptr, int len)
 {
-    (void) file;
-  
     for (uint32_t i = 0; i < len; i++)
     {
         usart_write(USART2, *ptr++);
     }
-  
+
     return len;
 }

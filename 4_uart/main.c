@@ -23,17 +23,21 @@ int main(void)
     // Set pin 13 connected to blue led of port C as output
     GPIOC->MODER |= (1 << GPIO_MODER_MODER13_Pos);
 
+    // Configure SysTick interrupt to fire every HCLK / 48000 = 1000 Hz = 1ms
     SysTick_Config(48000);
 
     __enable_irq();
 
     usart_init(USART2);
 
+//    setbuf(stdout, NULL); // Disable buffering for stdout
+
     while(1)
     {
         GPIOC->ODR ^= (1 << LED_PIN);
-        printf("[%7ld.%03i] LED: %o\r\n", ticks / 1000, (uint16_t) ticks % 1000, (unsigned char)!((GPIOC->ODR & (1 << LED_PIN)) >> LED_PIN));
-//        printf("[%.3f] Hello, World!\r\n", (float)(ticks/1000.0));
+        printf("[%ld.%03i] LED: %o\r\n", ticks / 1000, (uint16_t) ticks % 1000, (unsigned char)!((GPIOC->ODR & (1 << LED_PIN)) >> LED_PIN));
+//        printf("[%.3f] LED: %o\r\n", (float)(ticks / 1000.0), (unsigned char)!((GPIOC->ODR & (1 << LED_PIN)) >> LED_PIN));
+//        fflush(stdout);
         delay_ms(500);
     }
 
@@ -65,11 +69,12 @@ void clocks_setup()
     // enable Instruction prefetch (PRFTEN), Instruction cache (ICEN), Data cache (DCEN) 
     FLASH->ACR |= (FLASH_ACR_DCEN_Msk | FLASH_ACR_ICEN_Msk | FLASH_ACR_PRFTEN_Msk | FLASH_ACR_LATENCY_1WS);
 
-    /* 4. Main PLL configuration:
-     * PLL input should be withing 1-2 MHz range to achive that with HSE @ 25 MHz choosing PLLM=25 that gives 25 MHz / 25 = 1 MHz;
+    /*
+     * 4. Main PLL configuration:
+     * PLL input should be withing 1-2 MHz range to achieve that with HSE @ 25 MHz choosing PLLM=25 that gives 25 MHz / 25 = 1 MHz;
      * The output of the PLL fVCO should be withing 100-432 MHz range, choosing PLLN=192 gives fVCO = 1 MHz * 192 = 192 MHz;
      * Compromise SYSCLK will be 48 MHz. Choosing PLLP=4 giving PLLCLK and SYSCLK = 192 MHz / 4 = 48 MHz;
-     * The USB OTG FS clock mast be exactly 48 MHz, to achive that choosing PLLQ=4 giving PLL48CLK = 192 MHz / 4 = 48 MHz;
+     * The USB OTG FS clock mast be exactly 48 MHz, to achieve that choosing PLLQ=4 giving PLL48CLK = 192 MHz / 4 = 48 MHz;
      * Final PLL configuration is: PLLM=25, PLLN=192, PLLP=4, PLLQ=3
      * SYSCLK=48 MHz, PLL48CLK=48 MHz 
      */
@@ -79,10 +84,11 @@ void clocks_setup()
     // Set PLLM, PLLN, PLLP, PLLQ  and select HSE as PLL source
     RCC->PLLCFGR |= ((25 << RCC_PLLCFGR_PLLM_Pos) | (192 << RCC_PLLCFGR_PLLN_Pos) | (0b01 << RCC_PLLCFGR_PLLP_Pos) | (4 << RCC_PLLCFGR_PLLQ_Pos) | (1 << RCC_PLLCFGR_PLLSRC_Pos));
 
-    /* 5. Prescalers configuration:
+    /*
+     * 5. Prescalers configuration:
      * HCLK (CPU) clock derived from SYSCLK and mast not exceed 100 MHz, choosing AHB prescaler HPRE = 1 giving HCLK = SYSCLK;
-     * APB1 low speed peripherial clock PCLK1 derived from HCLK and mast not exceed 50 MHz, choosing PPRE1 = 1, giving APB1 = HCLK
-     * APB2 high speed peripherial clock PCLK2 derived from HCLK and mast no exceed 100 MHz, choosing PPRE2 = 1, giving APB2 = HCLK
+     * APB1 low speed peripheral clock PCLK1 derived from HCLK and mast not exceed 50 MHz, choosing PPRE1 = 1, giving APB1 = HCLK
+     * APB2 high speed peripheral clock PCLK2 derived from HCLK and mast no exceed 100 MHz, choosing PPRE2 = 1, giving APB2 = HCLK
      */
 
     // Clear PPRE2, PPRE1, HPRE bits
@@ -99,14 +105,14 @@ void clocks_setup()
 
     // 8. Select PLL output as system clock source
     RCC->CFGR |= (RCC_CFGR_SW_PLL << RCC_CFGR_SW_Pos);
-    // Wiat for PLL to become system clock source
+    // Wait for PLL to become system clock source
     while (! (RCC->CFGR & RCC_CFGR_SWS_PLL));
 
-    // 9. Disable internal 16 MHz RC oscillator (hsi) to reduce power consumption as it is not needed anymore
+    // 9. Disable internal 16 MHz RC oscillator (HSI) to reduce power consumption as it is not needed anymore
     RCC->CR &= ~(RCC_CR_HSION_Msk);
 }
 
-void Systick_exception_handler()
+void SysTick_Handler()
 {
     ticks++;
 }

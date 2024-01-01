@@ -12,8 +12,8 @@ void SWO_init(uint8_t STM_port)
     // Enable corresponding stimulus port
     ITM->TER |= (1 << STM_port);
 
-    // Make a dummy write
-    SWO_putc(0, STM_port);
+    // Make a dummy write because first byte seems to be lost after external reset
+    SWO_putc('\0', STM_port);
 }
 
 void SWO_putc(char c, uint8_t STM_port)

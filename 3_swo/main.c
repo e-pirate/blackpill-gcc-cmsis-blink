@@ -33,11 +33,10 @@ int main(void)
 //TODO: add output of "Device electronic signatures
 
 //    setbuf(stdout, NULL); // Disable buffering for stdout
-
     while(1)
     {
         GPIOC->ODR ^= (1 << LED_PIN);
-        printf("[%ld.%03i] LED: %o\r\n", ticks / 1000, (uint16_t) ticks % 1000, (unsigned char)!((GPIOC->ODR & (1 << LED_PIN)) >> LED_PIN));
+        printf("[%lu.%03lu] LED: %o\r\n", ticks / 1000, (uint32_t) ticks % 1000, (unsigned char)!((GPIOC->ODR & (1 << LED_PIN)) >> LED_PIN));
 //        printf("[%.3f] LED: %o\r\n", (float)(ticks / 1000.0), (unsigned char)!((GPIOC->ODR & (1 << LED_PIN)) >> LED_PIN));
 //        fflush(stdout);
         delay_ms(500);
@@ -119,10 +118,10 @@ void SysTick_Handler()
     ticks++;
 }
 
-void delay_ms(uint32_t milliseconds)
+void delay_ms(uint32_t ms)
 {
     uint32_t start = ticks;
-    uint32_t end = start + milliseconds;
+    uint32_t end = start + ms;
 
     // Overflow condition
     if (end < start)

@@ -3,6 +3,7 @@ OBJCOPY=arm-none-eabi-objcopy
 MD5SUM=md5sum
 ST-FLASH=st-flash
 ST-TRACE=st-trace
+F_CPU_MHZ=48
 
 CMSIS=../../CMSIS
 
@@ -62,4 +63,4 @@ clean:
 .PHONY: run
 run: bin
 	$(ST-FLASH) --reset write $(PROJECT).bin 0x8000000
-	$(ST-TRACE) --verbose=0 --clock=48
+	$(ST-TRACE) --clock=$(F_CPU_MHZ) --verbose=0

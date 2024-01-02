@@ -28,6 +28,7 @@ int main(void)
 
     __enable_irq();
 
+    // Initialaze ITM SWO port 0
     SWO_init(0);
 
 //TODO: add output of "Device electronic signatures
@@ -36,7 +37,7 @@ int main(void)
     while(1)
     {
         GPIOC->ODR ^= (1 << LED_PIN);
-        printf("[%lu.%03lu] LED: %o\r\n", ticks / 1000, (uint32_t) ticks % 1000, (unsigned char)!((GPIOC->ODR & (1 << LED_PIN)) >> LED_PIN));
+        printf("[%7lu.%03lu] LED: %o\r\n", ticks / 1000, ticks % 1000, (unsigned char)!((GPIOC->ODR & (1 << LED_PIN)) >> LED_PIN));
 //        printf("[%.3f] LED: %o\r\n", (float)(ticks / 1000.0), (unsigned char)!((GPIOC->ODR & (1 << LED_PIN)) >> LED_PIN));
 //        fflush(stdout);
         delay_ms(500);

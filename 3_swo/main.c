@@ -1,19 +1,23 @@
-#include <stdint.h>
 #include <stdio.h>
 #include "stm32f4xx.h"
+#include <stdarg.h>
 #include "swo.h"
 
 #define LED_PIN 13
 
-void clocks_config();
-void delay_ms(uint32_t milliseconds);
+void clocks_config ();
+void delay_ms (uint32_t milliseconds);
+void tick_log (const char *arg, ...);
+void print_system_info (void);
+
 
 volatile uint32_t ticks;
 
-int main(void)
+
+int main (void)
 {
+    // Configure system clocks
     clocks_config();
-    SystemCoreClockUpdate(); // Update the internal clock frequency variable
 
     // Enable clock at GPIO port C
     RCC->AHB1ENR |= RCC_AHB1ENR_GPIOCEN_Msk;
@@ -23,36 +27,39 @@ int main(void)
     // Set pin 13 connected to blue led of port C as output
     GPIOC->MODER |= (1 << GPIO_MODER_MODER13_Pos);
 
-    // Configure SysTick interrupt to fire every HCLK / 48000 = 1000 Hz = 1ms
-    SysTick_Config(48000);
+    // Configure SysTick interrupt to fire every 1ms
+    SysTick_Config(SystemCoreClock / 1000);
 
     __enable_irq();
 
-    // Initialaze ITM SWO port 0
+    // Initialize ITM SWO port 0
     SWO_init(0);
 
-//TODO: add output of "Device electronic signatures
+    // Make short delay after reset to give make enough time to start trace session
+    delay_ms(2);
 
-//    setbuf(stdout, NULL); // Disable buffering for stdout
+    // Print some information after system startup
+    print_system_info();
+
     while(1)
     {
         GPIOC->ODR ^= (1 << LED_PIN);
-        printf("[%7lu.%03lu] LED: %o\r\n", ticks / 1000, ticks % 1000, (unsigned char)!((GPIOC->ODR & (1 << LED_PIN)) >> LED_PIN));
-//        printf("[%.3f] LED: %o\r\n", (float)(ticks / 1000.0), (unsigned char)!((GPIOC->ODR & (1 << LED_PIN)) >> LED_PIN));
-//        fflush(stdout);
+
+        tick_log("LED: %o\r\n", (unsigned char)!((GPIOC->ODR & (1 << LED_PIN)) >> LED_PIN));
+
         delay_ms(500);
     }
 
     return(0);
 }
 
-void clocks_config()
+void clocks_config ()
 {
-    /* 
+    /*
      * After reset MCU clock source is set to internal 16 MHz RC oscillator
      * and flash wait states (WS) set to 0. To switch clock source and increase
      * CPU (HCLK) frequency special procedure mast be performed.
-     */ 
+     */
 
     // 1. Enable HSE (High speed external clock signal) @ 25 MHz and wait for it to become ready
     RCC->CR |= RCC_CR_HSEON_Msk;
@@ -68,7 +75,7 @@ void clocks_config()
     PWR->CR |= (0b01 << PWR_CR_VOS_Pos);
 
     // 3. Configure flash controller for 2.7-3.3V supply and 30 MHz < HCLK <= 64 < MHz -> 1 WS,
-    // enable Instruction prefetch (PRFTEN), Instruction cache (ICEN), Data cache (DCEN) 
+    // enable Instruction prefetch (PRFTEN), Instruction cache (ICEN), Data cache (DCEN)
     FLASH->ACR |= (FLASH_ACR_DCEN_Msk | FLASH_ACR_ICEN_Msk | FLASH_ACR_PRFTEN_Msk | FLASH_ACR_LATENCY_1WS);
 
     /*
@@ -78,7 +85,7 @@ void clocks_config()
      * Compromise SYSCLK will be 48 MHz. Choosing PLLP=4 giving PLLCLK and SYSCLK = 192 MHz / 4 = 48 MHz;
      * The USB OTG FS clock mast be exactly 48 MHz, to achieve that choosing PLLQ=4 giving PLL48CLK = 192 MHz / 4 = 48 MHz;
      * Final PLL configuration is: PLLM=25, PLLN=192, PLLP=4, PLLQ=3
-     * SYSCLK=48 MHz, PLL48CLK=48 MHz 
+     * SYSCLK=48 MHz, PLL48CLK=48 MHz
      */
 
     // Clear PLLM, PLLN, PLLP, PLLQ bits
@@ -112,23 +119,50 @@ void clocks_config()
 
     // 9. Disable internal 16 MHz RC oscillator (HSI) to reduce power consumption as it is not needed anymore
     RCC->CR &= ~(RCC_CR_HSION_Msk);
+
+    // Update the internal clock frequency variable
+    SystemCoreClockUpdate();
 }
 
-void SysTick_Handler()
+
+void SysTick_Handler ()
 {
     ticks++;
 }
 
-void delay_ms(uint32_t ms)
+
+void delay_ms (uint32_t ms)
 {
     uint32_t start = ticks;
     uint32_t end = start + ms;
 
     // Overflow condition
     if (end < start)
-    {
         while (ticks > start); // Wait for ticks to wrap
-    }
 
     while (ticks < end);
+}
+
+
+void tick_log (const char *arg, ...)
+{
+    va_list arglist;
+
+    va_start(arglist, arg);
+
+    printf("[%7lu.%03lu] ", ticks / 1000, ticks % 1000);
+    vprintf(arg, arglist);
+
+    va_end(arglist);
+}
+
+
+//TODO: add output of "Device electronic signatures"
+void print_system_info (void)
+{
+    tick_log("SMT32F411CEU6 running at: %u.%03u MHz.\r\n", SystemCoreClock / 1000000, SystemCoreClock % 1000000);
+    tick_log("%s\r\n", __VERSION__);
+
+//    setbuf(stdout, NULL); // Disable buffering for stdout
+//    fflush(stdout);
 }

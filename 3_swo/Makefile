@@ -3,13 +3,14 @@ OBJCOPY=arm-none-eabi-objcopy
 MD5SUM=md5sum
 ST-FLASH=st-flash
 ST-TRACE=st-trace
+DFU-UTIL=dfu-util
 F_CPU_MHZ=48
 
 CMSIS=../../CMSIS
 
 LINKER_FILE=stm32f411xe.ld
 
-CFLAGS=-std=c99 -Wall -Werror
+CFLAGS=-std=c99 -Wall
 CFLAGS+=-O1 -fdce -ffunction-sections -fdata-sections# Optimize for unused code
 CFLAGS+=-mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mabi=aapcs -mfpu=fpv4-sp-d16 -mthumb-interwork
 CFLAGS+=-specs=nano.specs
@@ -64,3 +65,7 @@ clean:
 run: bin
 	$(ST-FLASH) --reset write $(PROJECT).bin 0x8000000
 	$(ST-TRACE) --clock=$(F_CPU_MHZ) --verbose=0
+
+.PHONY: dfu
+dfu: bin
+	$(DFU-UTIL) -d 0483:df11 -a 0 -s 0x08000000:leave -D $(PROJECT).bin

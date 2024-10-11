@@ -6,7 +6,8 @@
 #undef errno
 extern int errno;
 
-void _exit(int exit_code)
+
+void _exit (int exit_code)
 {
     while (1)
     {
@@ -14,73 +15,84 @@ void _exit(int exit_code)
     }
 }
 
-int _close(int file)
+
+int _close (int file)
 {
     return -1;
 }
 
+
 char *__env[1] = { 0 };
 char **environ = __env;
 
-int _execve(char *name, char **argv, char **env)
+int _execve (char *name, char **argv, char **env)
 {
     errno = ENOMEM;
     return -1;
 }
 
-int _fork(void)
+
+int _fork (void)
 {
     errno = EAGAIN;
     return -1;
 }
 
 
-int _fstat(int file, struct stat *st)
+int _fstat (int file, struct stat *st)
 {
     st->st_mode = S_IFCHR;
     return 0;
 }
 
-int _getpid(void)
+
+int _getpid (void)
 {
     return 1;
 }
 
-int _isatty(int file)
+
+int _isatty (int file)
 {
     return 1;
 }
 
-int _kill(int pid, int sig)
+
+int _kill (int pid, int sig)
 {
     errno = EINVAL;
     return -1;
 }
 
-int _link(char *old, char *new)
+
+int _link (char *old, char *new)
 {
     errno = EMLINK;
     return -1;
 }
 
-int _lseek(int file, int ptr, int dir)
+
+int _lseek (int file, int ptr, int dir)
 {
     return 0;
 }
 
-int _open(const char *name, int flags, int mode)
+
+int _open (const char *name, int flags, int mode)
 {
     return -1;
 }
 
-int _read(int file, char *ptr, int len)
+
+int _read (int file, char *ptr, int len)
 {
     return 0;
 }
 
+
 register char * stack_ptr __asm("sp");
 
-caddr_t _sbrk(int incr)
+caddr_t _sbrk (int incr)
 {
     extern char _end;		/* Defined by the linker */
     static char *heap_end;
@@ -106,35 +118,35 @@ caddr_t _sbrk(int incr)
     return (caddr_t) prev_heap_end;
 }
 
-int _stat(char *file, struct stat *st)
+
+int _stat (char *file, struct stat *st)
 {
     st->st_mode = S_IFCHR;
     return 0;
 }
 
-int _times(struct tms *buf)
+
+int _times (struct tms *buf)
 {
     return -1;
 }
 
-int _unlink(char *name)
+
+int _unlink (char *name)
 {
     errno = ENOENT;
     return -1;
 }
 
-int _wait(int *status)
+
+int _wait (int *status)
 {
     errno = ECHILD;
     return -1;
 }
 
-int _write(int file, char *ptr, int len)
-{
-    for (uint32_t i = 0; i < len; i++)
-    {
-        SWO_putc(*ptr++, 0);
-    }
 
-    return len;
+int _write (int file, char *ptr, int len)
+{
+    return SWO_write(0, ptr, len);
 }

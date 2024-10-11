@@ -6,8 +6,9 @@
 // Provided by linker
 extern uint32_t _estack, _sdata, _edata, _sbss, _ebss, _sidata;
 
-int main(void);
+int main (void);
 void __libc_init_array();
+
 
 // Cortex-M4 system exceptions
 void Default_Handler                    (void);
@@ -22,6 +23,7 @@ void SVC_Handler                        (void) __attribute__ ((weak, alias("Defa
 void DebugMon_Handler                   (void) __attribute__ ((weak, alias("Default_Handler")));
 void PendSV_Handler                     (void) __attribute__ ((weak, alias("Default_Handler")));
 void SysTick_Handler                    (void) __attribute__ ((weak, alias("Default_Handler")));
+
 
 // STM32F411xC/E interrupt handlers
 void WWDG_IRQHandler                    (void) __attribute__ ((weak, alias("Default_Handler")));
@@ -81,6 +83,7 @@ void I2C3_ER_IRQHandler                 (void) __attribute__ ((weak, alias("Defa
 void FPU_IRQHandler                     (void) __attribute__ ((weak, alias("Default_Handler")));
 void SPI4_IRQHandler                    (void) __attribute__ ((weak, alias("Default_Handler")));
 void SPI5_IRQHandler                    (void) __attribute__ ((weak, alias("Default_Handler")));
+
 
 uint32_t isr_vector[ISR_VECTOR_SIZE_WORDS] __attribute__ ((section(".isr_vector"))) = {
     (uint32_t)&_estack,                         // 0x0000 0000          Initial Stack Pointer
@@ -189,7 +192,8 @@ uint32_t isr_vector[ISR_VECTOR_SIZE_WORDS] __attribute__ ((section(".isr_vector"
     (uint32_t)&SPI5_IRQHandler                  // 0x0000 0194          SPI5 global
 };
 
-void Reset_Handler(void)
+
+void Reset_Handler (void)
 {
     // Copy .data from FLASH to RAM
     uint32_t data_size = (uint32_t)&_edata - (uint32_t)&_sdata;
@@ -219,7 +223,8 @@ void Reset_Handler(void)
     main();
 }
 
-void Default_Handler(void)
+
+void Default_Handler (void)
 {
     while(1);
 }

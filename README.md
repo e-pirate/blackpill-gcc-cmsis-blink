@@ -18,9 +18,10 @@ This project will be particularly useful for developers using GNU/Linux as host 
 The project is divided on several "stages" with growing complexity and functionality that utilize different MCU's hardware and peripherals. Each "stage" is placed in individual directory and can be compiled separately. 
 * **1_hsi** - blink led using internal 16MHz RC as clock source and dummy for-loop delay
 * **2_hse_pll** - blink led using external 25MHz crystal and PLL as clock source and tick-based delay
+* **3_swo** - utilize SWO (Serial Wire Output) for printing debug messages to the host system
 
 ## Uploading firmware to MCU flash memory
-To load compiled firmware to the MCU's flash memory a programmer is required. It is strongly recommended to have one of this cheap Chinese **ST-Link V2** clones because it make things much easier and faster without any manual manipulation involved. An **ST-Link V2-1** with **SWO** (Serial Wire Output) line is even better choice because it allows host system to receive trace messages from a running MCU with just one extra pin used and no additional software needed. This trace messages are extremely valuable because they give an idea what's going on inside running MCU with very little effort and negligible firmware size grows. Connect ST-Link V2 to the BlackPill board according to pinouts.
+To load compiled firmware to the MCU's flash memory a programmer is required. It is strongly recommended to use one of this cheap Chinese **ST-Link V2** clones because it make things much easier and faster without any manual manipulation involved. An **ST-Link V2-1** with **SWO** (Serial Wire Output) and **VCP** (Virtual COM Port) lines is even better choice. SWO allows host system to receive debug messages from a running MCU with just one extra pin used and no additional software needed. This debug messages are extremely valuable because they give an idea what's going on inside running MCU with very little effort and negligible firmware size grows. VCP provides virtual UART port without any extra devices attached to your computer USB ports allowing you to communicate with MCU using common terminal programs like `cu` for sending and receiving data while been able to flash firmware and use SWO for debugging at the same time with a single device occupying only one USB port on your host system. Beware that most of ST-Link V2 clones do not support SWO and VCP without PCB rework and firmware update. Connect ST-Link V2's SWO pin to the BlackPill's JTDO-SWO board pin B3 for the SWO debugging feature to work. For VCP connect RXD and TXD pins of ST-Link V2-1 to A2 and A3 pins of the BlackPill board respectively.
 
 If programmer is not available, it is also possible to upload firmware on some (including described STM32F411) ST MCUs using DFU method that requires no additional hardware except USB Type-C cable and `dfu-util`. To enter DFU bootloader mode on BlackPill board it should be connected to the USB port of the host system and special button sequence mast be performed. Please, refer to section "How to enter ISP mode" of WeAct Studio board description page mentioned above.
 
@@ -78,12 +79,23 @@ Before proceeding to code compilation some documents should be obtained for a cl
 
 Many other valuable documents can be downloaded at ST's PDF page [here](https://www.st.com/en/microcontrollers-microprocessors/stm32f411/documentation.html).
 
-## Compilation
+## Compilation and flashing
 The project repository should be cloned to the same directory where `CMSIS` is placed not to brake paths included during compilation. After all preparations are done and assuming that BlackPill is connected to ST-Link V2, it is time for the first attempt:
 ```bash
 git clone https://github.com/e-pirate/blackpill-gcc-cmsis-blink.git
 cd blackpill-gcc-cmsis-blink/1_hsi/
+```
+Then depending on the flashing method execute:
+
+For the recommended **ST-Link V2** programmer:
+```bash
 make run
 ```
 
-Have fun!
+For the **DFU** method you should first make MCU enter the DFU mode. This may be tricky and not work all the time. Connect the BlackPill board to the host system with USB Type-C cable, then hold both NRST and BOOT0 buttons simultaneously, release NRST button and then after 0.5 seconds release BOOT0 button. To ensure that MCU entered DFU mode run `dfu-util -l` and check for lines starting with 'Found DFU' and one having something similar to "@Internal Flash  /0x08000000/04*016Kg,01*064Kg,03*128Kg".
+Then execute:
+```bash
+make dfu
+```
+
+Don't waste you time and have fun!

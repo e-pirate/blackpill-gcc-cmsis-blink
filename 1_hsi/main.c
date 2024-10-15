@@ -3,7 +3,7 @@
 
 #define LED_PIN 13
 
-int main(void)
+int main (void)
 {
     // Enable clock at GPIO port C
     RCC->AHB1ENR |= RCC_AHB1ENR_GPIOCEN_Msk;
@@ -11,7 +11,7 @@ int main(void)
     __DSB();
 
     // Set pin 13 connected to blue led of port C as output
-    GPIOC->MODER |= (0b01 << GPIO_MODER_MODER13_Pos);
+    GPIOC->MODER |= (1 << GPIO_MODER_MODER13_Pos);
 
     while(1)
     {

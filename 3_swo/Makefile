@@ -43,7 +43,7 @@ elf: startup_stm32f411xx.o system_stm32f4xx.o syscalls.o swo.o main.o
 	$(MD5SUM) $(PROJECT).elf
 
 main.o: main.c
-	$(CC) $(CFLAGS) -c $^ 
+	$(CC) $(CFLAGS) -c $^
 
 startup_stm32f411xx.o: startup_stm32f411xx.c
 	$(CC) $(CFLAGS) -c $^

@@ -161,8 +161,9 @@ void tick_log (const char *arg, ...)
 //TODO: add output of "Device electronic signatures"
 void print_system_info (void)
 {
-    tick_log("SMT32F411CEU6 running at: %u.%03u MHz.\r\n", SystemCoreClock / 1000000, SystemCoreClock % 1000000);
-    tick_log("%s\r\n", __VERSION__);
+    tick_log("Firmware version: %s (Arm GNU Toolchain: %s, CMSIS-Core(M): %d.%d) compiled %s\r\n", \
+            "blink-1.0.3", __VERSION__, __CM_CMSIS_VERSION_MAIN, __CM_CMSIS_VERSION_SUB, __DATE__);
+    tick_log("MCU: SMT32F411CEU6 running at: %u.%03u MHz.\r\n", SystemCoreClock / 1000000, SystemCoreClock % 1000000);
 
 //    setbuf(stdout, NULL); // Disable buffering for stdout
 //    fflush(stdout);

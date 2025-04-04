@@ -64,7 +64,7 @@ clean:
 .PHONY: run
 run: bin
 	$(ST-FLASH) --reset write $(PROJECT).bin 0x8000000
-	$(ST-TRACE) --clock=$(F_CPU_MHZ) --verbose=0
+	$(ST-TRACE) --clock=$(F_CPU_MHZ)m --verbose=0
 
 .PHONY: dfu
 dfu: bin
